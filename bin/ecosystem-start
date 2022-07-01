@@ -1,0 +1,39 @@
+#! /bin/sh
+
+echo "Starting CDB/traveler ecosystem"
+
+echo
+echo "======================================"
+echo "Starting Mongo DB"
+echo "======================================"
+echo
+/home/cdb/cdb-support/bin/mongodb-start
+
+echo
+echo "======================================"
+echo "Starting LDAP"
+echo "======================================"
+echo
+/home/cdb/cdb-support/bin/ldap-start
+
+echo
+echo "======================================"
+echo "Starting Mongo express"
+echo "======================================"
+echo
+/home/cdb/cdb-support/bin/mongoexpress-start
+
+echo
+echo "======================================"
+echo "Starting traveler"
+echo "======================================"
+echo
+/home/cdb/cdb-support/bin/traveler-start
+
+echo
+echo "======================================"
+echo "Starting CDB"
+echo "======================================"
+echo
+/home/cdb/cdb-support/bin/cdb-start
+

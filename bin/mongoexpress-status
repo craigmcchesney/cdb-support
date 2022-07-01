@@ -1,0 +1,4 @@
+#!/bin/sh
+
+source /opt/traveler/current/setup.sh && /opt/traveler/traveler-APS-1.5.5/etc/init.d/traveler-mongo-express status
+

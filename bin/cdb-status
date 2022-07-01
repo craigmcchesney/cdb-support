@@ -1,0 +1,5 @@
+#! /bin/sh
+
+scriptdir=`readlink -f /opt/cdb/current`
+cd $scriptdir && source ./setup.sh && ./etc/init.d/cdb-glassfish status
+

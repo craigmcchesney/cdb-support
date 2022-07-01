@@ -1,0 +1,39 @@
+#! /bin/sh
+
+echo "Stopping CDB/traveler ecosystem"
+
+echo
+echo "======================================"
+echo "Stopping CDB"
+echo "======================================"
+echo
+/home/cdb/cdb-support/bin/cdb-stop
+
+echo
+echo "======================================"
+echo "Stopping traveler"
+echo "======================================"
+echo
+/home/cdb/cdb-support/bin/traveler-stop
+
+echo
+echo "======================================"
+echo "Stopping Mongo express"
+echo "======================================"
+echo
+/home/cdb/cdb-support/bin/mongoexpress-stop
+
+echo
+echo "======================================"
+echo "Stopping Mongo DB"
+echo "======================================"
+echo
+/home/cdb/cdb-support/bin/mongodb-stop
+
+echo
+echo "======================================"
+echo "Stopping LDAP"
+echo "======================================"
+echo
+/home/cdb/cdb-support/bin/ldap-stop
+

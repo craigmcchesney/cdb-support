@@ -1,0 +1,4 @@
+#!/bin/sh
+
+cd /opt/docker-ldap/traveler-ldap && /usr/local/bin/docker-compose ps
+

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# we need to set this environment variable to override default "localhost" in /opt/traveler/support/nodejs/node_modules/mongo-express/config.js
+export VCAP_APP_HOST=0.0.0.0
+
+# use pm2 directly instead of etc/init.d/traveler-mongo-express since it uses "pm2 restart" which fails after reboot
+# then call traveler-mongo-express because it sets the necessary environment variables
+# if traveler-mongo-express was changed to use "startOrRestart" to handle start option instead of "restart",
+# it would not be necessary to call "pm2 start" directly to simply register the process with the daemon
+source /opt/traveler/current/setup.sh && /opt/traveler/support/nodejs/linux-x86_64/bin/pm2 start /opt/traveler/support/nodejs/node_modules/mongo-express/app.js --name mongo-express && /opt/traveler/current/etc/init.d/traveler-mongo-express start
+

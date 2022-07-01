@@ -1,0 +1,5 @@
+#!/bin/sh
+
+scriptdir=`readlink -f /opt/traveler/current`
+cd $scriptdir && source ./setup.sh && ./etc/init.d/traveler-webapp status
+
