@@ -1,0 +1,9 @@
+#! /bin/sh
+
+~/cdb-support/bin/cdb-customize
+
+scriptdir=`readlink -f /opt/cdb/current`
+cd $scriptdir && source ./setup.sh
+make undeploy-web-portal && make unconfigure-web-portal
+make configure-web-portal && make deploy-web-portal
+

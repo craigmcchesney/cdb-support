@@ -1,0 +1,20 @@
+#! /bin/sh
+
+if [ -e ~/cdb-deployment/custom/images/custom-logo-167x75.png ]
+then
+    mv /opt/cdb/current/src/java/CdbWebPortal/web/resources/images/AnlLogo167x75.png /opt/cdb/current/src/java/CdbWebPortal/web/resources/images/AnlLogo167x75.png.orig
+    cp ~/cdb-deployment/custom/images/custom-logo-167x75.png /opt/cdb/current/src/java/CdbWebPortal/web/resources/images/AnlLogo167x75.png
+    echo "installed custom logo ~/cdb-deployment/custom/images/custom-logo-167x75.png"
+else
+    echo "no custom logo file found ~/cdb-deployment/custom/images/custom-logo-167x75.png"
+fi
+
+if [ -e ~/cdb-deployment/custom/images/custom-ico-16x16.png ]
+then
+    mv /opt/cdb/current/src/java/CdbWebPortal/web/resources/images/anl.ico /opt/cdb/current/src/java/CdbWebPortal/web/resources/images/anl.ico.orig
+    cp ~/cdb-deployment/custom/images/custom-ico-16x16.png /opt/cdb/current/src/java/CdbWebPortal/web/resources/images/anl.ico
+    echo "installed custom icon ~/cdb-deployment/custom/images/custom-ico-16x16.png"
+else
+    echo "no custom icon file found ~/cdb-deployment/custom/images/custom-ico-16x16.png"
+fi
+

@@ -1,0 +1,5 @@
+#!/bin/sh
+
+scriptdir=`readlink -f /opt/traveler/current`
+cd $scriptdir && source ./setup.sh && npm install
+
