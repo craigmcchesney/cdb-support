@@ -1,4 +1,4 @@
 #!/bin/sh
 
-cd /opt/docker-ldap/traveler-ldap && /usr/local/bin/docker-compose stop
+cd /opt/docker-ldap && /usr/local/bin/docker-compose stop
 
