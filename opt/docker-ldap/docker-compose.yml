@@ -18,6 +18,11 @@ services:
       - 6443:443
     environment:
       - PHPLDAPADMIN_LDAP_HOSTS=ldap-service
+      - PHPLDAPADMIN_HTTPS_CRT_FILENAME=cert.pem
+      - PHPLDAPADMIN_HTTPS_KEY_FILENAME=privkey.pem
+      - PHPLDAPADMIN_HTTPS_CA_CRT_FILENAME=fullchain.pem
+    volumes:
+      - ~/cdb-deployment/config/cdb/etc/CA/certs/ospreydcs.com:/container/service/phpldapadmin/assets/apache2/certs:ro
     depends_on:
       - ldap-service
 
