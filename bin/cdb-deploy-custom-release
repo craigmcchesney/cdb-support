@@ -1,9 +1,15 @@
 #! /bin/sh
 
+# Use this script to build a new cdb release including customizations such as logo. This is necessary when updating to a new release or installing initially.
+
 ~/cdb-support/bin/cdb-customize
 
 scriptdir=`readlink -f /opt/cdb/current`
 cd $scriptdir && source ./setup.sh
 make undeploy-web-portal && make unconfigure-web-portal
+
+# deploy cdb plugin to target release so that traveler integration is enabled, otherwise it won't be added to cdb
+make deploy-cdb-plugin
+
 make configure-web-portal && make deploy-web-portal
 
