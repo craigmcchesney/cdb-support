@@ -1,0 +1,10 @@
+#!/bin/sh
+
+if [[ ! -v CDB_ENV_PASSWD_MYSQL_ROOT ]]; then
+    echo "$CDB_ENV_PASSWD_MYSQL_ROOT is not set"
+elif [[ -z "$CDB_ENV_PASSWD_MYSQL_ROOT" ]]; then
+    echo "$CDB_ENV_PASSWD_MYSQL_ROOT is set to empty"
+else
+    mysql --port=3306 --host=127.0.0.1 -u root -p$CDB_ENV_PASSWD_MYSQL_ROOT -D cdb
+fi
+

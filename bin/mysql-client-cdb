@@ -1,0 +1,9 @@
+#!/bin/sh
+
+if [[ ! -v CDB_ENV_PASSWD_MYSQL_CDB ]]; then
+    echo "$CDB_ENV_PASSWD_MYSQL_CDB is not set"
+elif [[ -z "$CDB_ENV_PASSWD_MYSQL_CDB" ]]; then
+    echo "$CDB_ENV_PASSWD_MYSQL_CDB is set to empty"
+else
+    mysql --port=3306 --host=127.0.0.1 -u cdb -p$CDB_ENV_PASSWD_MYSQL_CDB -D cdb
+fi
