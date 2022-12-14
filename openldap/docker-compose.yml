@@ -1,0 +1,39 @@
+version: "2"
+services:
+  ldap-service:
+    image: osixia/openldap:1.5.0
+    command: --copy-service
+    environment:
+      - LDAP_TLS=true
+      - LDAP_TLS_CRT_FILENAME=cert.pem
+      - LDAP_TLS_KEY_FILENAME=privkey.pem
+      - LDAP_TLS_DH_PARAM_FILENAME=dhparam.pem
+      - LDAP_TLS_CA_CRT_FILENAME=fullchain.pem
+      # uncomment line below if not using --copy-service command, otherwise service fails on startup
+      #- LDAP_REMOVE_CONFIG_AFTER_SETUP=false
+      - LDAP_OPENLDAP_UID=1001
+      - LDAP_OPENLDAP_GID=1001
+    volumes:
+      - ~/cdb-deployment/openldap/seed:/container/service/slapd/assets/config/bootstrap/ldif/custom
+      - ~/cdb-deployment/openldap/environment:/container/environment/01-custom
+      - ~/cdb-deployment/config/cdb/etc/CA/certs/ospreydcs.com:/container/service/slapd/assets/certs
+      - ~/cdb-deployment/openldap/slapd-database:/var/lib/ldap
+      - ~/cdb-deployment/openldap/slapd-config:/etc/ldap/slapd.d
+    ports:
+      - 389:389
+      - 636:636
+  phpldapadmin:
+    image: osixia/phpldapadmin:latest
+    restart: "no"
+    ports:
+      - 6443:443
+    environment:
+      - PHPLDAPADMIN_LDAP_HOSTS=ldap-service
+      - PHPLDAPADMIN_HTTPS_CRT_FILENAME=cert.pem
+      - PHPLDAPADMIN_HTTPS_KEY_FILENAME=privkey.pem
+      - PHPLDAPADMIN_HTTPS_CA_CRT_FILENAME=fullchain.pem
+    volumes:
+      - ~/cdb-deployment/config/cdb/etc/CA/certs/ospreydcs.com:/container/service/phpldapadmin/assets/apache2/certs
+    depends_on:
+      - ldap-service
+

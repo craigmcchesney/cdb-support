@@ -1,4 +1,4 @@
 #!/bin/sh
 
-cd /opt/docker-ldap && /usr/local/bin/docker-compose up -d
+cd ~/cdb-support/openldap && /usr/local/bin/docker-compose up -d
 

@@ -1,0 +1,83 @@
+#!/bin/sh
+
+SEED_FILE=~/cdb-deployment/custom/openldap/openldap-seed.ldif
+CONFIG_FILE=~/cdb-deployment/custom/openldap/environment/openldap.startup.yaml
+
+SEED_TARGET_DIR=~/cdb-deployment/openldap/seed/
+CONFIG_TARGET_DIR=~/cdb-deployment/openldap/environment/
+
+SLAPD_DATA_DIR=~/cdb-deployment/openldap/slapd-database
+SLAPD_CONFIG_DIR=~/cdb-deployment/openldap/slapd-config
+
+SEED_TARGET_FILE=~/cdb-deployment/openldap/seed/openldap-seed.ldif
+CONFIG_TARGET_FILE=~/cdb-deployment/openldap/environment/openldap.startup.yaml
+
+DHPARAMS_CERT_FILE=~/cdb-deployment/config/cdb/etc/CA/certs/ospreydcs.com/dhparam.pem
+
+# generate dhparam.pem file if it doesn't exist, required in docker-compose file
+echo "checking for dhparam.pem certificate file"
+
+if [ ! -f "$DHPARAMS_CERT_FILE" ]; then
+    echo "$DHPARAMS_CERT_FILE does not exist, generating using openssl"
+    openssl dhparam -out $DHPARAMS_CERT_FILE 2048
+    if [ ! -f "$DHPARAMS_CERT_FILE" ]; then
+        echo "openssl failed to generate $DHPARAMS_CERT_FILE"
+        exit 1
+    else
+        echo "openssl generated $DHPARAMS_CERT_FILE"
+    fi
+fi
+
+# check that required seed customization and environment config files exist
+echo "checking that required input files exist"
+
+if [ ! -f "$SEED_FILE" ]; then
+    echo "$SEED_FILE does not exist"
+    exit 1
+fi
+
+if [ ! -f "$CONFIG_FILE" ]; then
+    echo "$CONFIG_FILE does not exist"
+    exit 1
+fi 
+
+# create target directories if they don't exist
+echo "checking/creating target directories"
+
+if [ ! -d "$SEED_TARGET_DIR" ]; then
+    echo "creating directory $SEED_TARGET_DIR"
+    mkdir -p $SEED_TARGET_DIR
+fi
+
+if [ ! -d "$CONFIG_TARGET_DIR" ]; then
+    echo "creating directory $CONFIG_TARGET_DIR"
+    mkdir -p $CONFIG_TARGET_DIR
+fi
+
+# create slapd data/config directories if they don't exist
+echo "checking/creating slapd data/config directories"
+
+if [ ! -d "$SLAPD_DATA_DIR" ]; then
+    echo "creating directory $SLAPD_DATA_DIR"
+    mkdir -p $SLAPD_DATA_DIR
+fi
+
+if [ ! -d "$SLAPD_CONFIG_DIR" ]; then
+    echo "creating directory $SLAPD_CONFIG_DIR"
+    mkdir -p $SLAPD_CONFIG_DIR
+fi
+
+# copy seed and environment config files to target directories
+echo "copying input files to target directories"
+
+cp $SEED_FILE $SEED_TARGET_DIR || { echo "error copying to $SEED_TARGET_FILE"; exit 1; }
+cp $CONFIG_FILE $CONFIG_TARGET_DIR || { echo "error copying to $CONFIG_TARGET_FILE"; exit 1; }
+
+# create openldap and phpldapadmin docker containers
+echo "creating docker containers for openldap and phpldapadmin"
+
+/usr/local/bin/docker-compose -f ~/cdb-support/openldap/docker-compose.yml create
+/usr/local/bin/docker-compose ls -a
+
+echo
+echo "===== use ldap-start to start openldap and phpldapadmin docker containers ====="

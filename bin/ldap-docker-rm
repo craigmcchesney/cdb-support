@@ -1,0 +1,15 @@
+#!/bin/sh
+
+echo "========== docker-compose -f ~/cdb-support/openldap/docker-compose.yml rm =========="
+# remove docker containers for openldap, phpldapadmin
+/usr/local/bin/docker-compose -f ~/cdb-support/openldap/docker-compose.yml rm
+
+echo ""
+echo "========== docker compose ls -a =========="
+/usr/local/bin/docker-compose ls -a
+
+echo
+echo "========== removing ~/cdb-deployment/openldap subdirectory contents =========="
+ls -l ~/cdb-deployment/openldap
+rm -rf ~/cdb-deployment/openldap/*
+
