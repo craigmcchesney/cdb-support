@@ -1,0 +1,32 @@
+#!/bin/sh
+
+echo "The certbot tool will prompt you to enter DNS TXT records for acme-challenge domains"
+echo "for the purpose of verifying ownership.  Use the fastmail tool to create the DNS text records."
+echo "After creating and saving the DNS records, use the google tool to verify they have been published"
+echo "before continuing the final certbot prompt."
+echo "***** https://www.fastmail.com/settings/domains/646065/dns?u=096940ef"
+echo "***** https://toolbox.googleapps.com/apps/dig/#TXT/_acme-challenge.traveler-demo.ospreydcs.com"
+echo
+
+cd ~/cdb-deployment/letsencrypt && certbot certonly --manual --preferred-challenges=dns --email cmcchesney@ospreydcs.com --agree-tos --config-dir ./config --logs-dir ./logs --work-dir ./workdir -d *.ospreydcs.com -d *.cdb-demo.ospreydcs.com -d *.mpex.ospreydcs.com -d *.alsu.ospreydcs.com
+
+echo "Perform the following steps after generating cert:"
+echo "* change to directory containing new cert files (e.g., /home/centos/letsencrypt/config/live/ospreydcs.com)"
+echo "* sudo su"
+echo "* cp *.pem /home/cdb/cdb-deployment/config/cdb/etc/CA/certs/ospreydcs.com"
+echo "* chown cdb /home/cdb/cdb-deployment/config/cdb/etc/CA/certs/ospreydcs.com/*.pem"
+echo "* chgrp cdb /home/cdb/cdb-deployment/config/cdb/etc/CA/certs/ospreydcs.com/*.pem"
+echo "* sudo systemctl restart nginx"
+echo "* exit"
+echo "* sudo su cdb"
+echo
+echo "* The following steps are necessary if the cert filenames changed:"
+echo "***** edit /opt/traveler/etc/traveler-config/app.json to use correct cert filenames"
+echo "***** edit /opt/traveler/etc/traveler-config/api.json to use correct cert filenames"
+echo
+echo "* ./sbin/cdb_update_glassfish_ssl.sh /opt/cdb/etc/CA/certs/ospreydcs.com/privkey.pem /opt/cdb/etc/CA/certs/ospreydcs.com/fullchain.pem"
+echo "* ~/cdb-support/bin/ecosystem-stop"
+echo "* ~/cdb-support/bin/ecosystem-start"
+echo "* Test cdb access https://cdb-demo.ospreydcs.com:8181/cdb"
+echo "* Test traveler access https://traveler-demo.ospreydcs.com:3001"
+
