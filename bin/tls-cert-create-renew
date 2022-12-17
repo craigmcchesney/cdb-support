@@ -12,13 +12,8 @@ cd ~/cdb-deployment/letsencrypt && certbot certonly --manual --preferred-challen
 
 echo "Perform the following steps after generating cert:"
 echo "* change to directory containing new cert files (e.g., /home/centos/letsencrypt/config/live/ospreydcs.com)"
-echo "* sudo su"
 echo "* cp *.pem /home/cdb/cdb-deployment/config/cdb/etc/CA/certs/ospreydcs.com"
-echo "* chown cdb /home/cdb/cdb-deployment/config/cdb/etc/CA/certs/ospreydcs.com/*.pem"
-echo "* chgrp cdb /home/cdb/cdb-deployment/config/cdb/etc/CA/certs/ospreydcs.com/*.pem"
 echo "* sudo systemctl restart nginx"
-echo "* exit"
-echo "* sudo su cdb"
 echo
 echo "* The following steps are necessary if the cert filenames changed:"
 echo "***** edit /opt/traveler/etc/traveler-config/app.json to use correct cert filenames"
