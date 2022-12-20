@@ -6,6 +6,7 @@ import os.path
 from os import path
 import time
 import shutil
+import subprocess
 
 cdb_home_dir = os.getenv('HOME')
 template_base_dir = cdb_home_dir + "/" + "cdb-support/customization/templates"
@@ -20,6 +21,21 @@ def validate_environment_variable(name, value):
     if (value is None or value == ""):
         fatal_error("no value specified for $%s variable" % name)
 
+def run_subprocess(commandArray):
+    result = subprocess.run(commandArray, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+    print("running: %s" % str(commandArray))
+    print("stdout: ", result.stdout)
+    print("stderr: ", result.stderr)
+
+def pre_customize_processing():
+    
+    print()
+    print("===== pre-customization processing =====")
+    print()
+
+    print("setting permissive selinux permissions to make nginx happy...")
+    run_subprocess([cdb_home_dir + "/cdb-support/bin/selinux-permissive"])
+    
 def customize_nginx():
 
     # get environment variables for template replacement
@@ -112,6 +128,15 @@ def customize_nginx():
     print()
     print("installed nginx config file: %s" % nginx_config_file_path)
     print("installed nginx repo file: %s" % nginx_repo_file_path)
+
+def post_customize_processing():
+
+    print()
+    print("===== post-customization processing =====")
+    print()
+
+    print("restarting nginx...")
+    run_subprocess(["/bin/sudo", "systemctl", "restart", "nginx"])
     
 def main():
 
@@ -121,8 +146,10 @@ def main():
     print("cdb home dir: %s" % cdb_home_dir)
     print("template base dir: %s" % template_base_dir)
     print("temp base dir: %s" % temp_base_dir)
-    
+
+    pre_customize_processing()    
     customize_nginx()
+    post_customize_processing()
     
 if __name__ == "__main__":
     main()
