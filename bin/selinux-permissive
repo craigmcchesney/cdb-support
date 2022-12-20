@@ -1,6 +1,0 @@
-#!/bin/sh
-sudo setsebool httpd_can_network_connect on -P
-sudo setsebool -P httpd_enable_homedirs 1
-sudo setenforce 0
-sudo systemctl daemon-reload
-
