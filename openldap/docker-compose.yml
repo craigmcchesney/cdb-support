@@ -14,11 +14,11 @@ services:
       - LDAP_OPENLDAP_UID=1001
       - LDAP_OPENLDAP_GID=1001
     volumes:
-      - ~/cdb-deployment/openldap/seed:/container/service/slapd/assets/config/bootstrap/ldif/custom
-      - ~/cdb-deployment/openldap/environment:/container/environment/01-custom
+      - ~/cdb-deployment/docker-volume-mounts/openldap/seed:/container/service/slapd/assets/config/bootstrap/ldif/custom
+      - ~/cdb-deployment/docker-volume-mounts/openldap/environment:/container/environment/01-custom
       - ~/cdb-deployment/config/cdb/etc/CA/certs/ospreydcs.com:/container/service/slapd/assets/certs
-      - ~/cdb-deployment/openldap/slapd-database:/var/lib/ldap
-      - ~/cdb-deployment/openldap/slapd-config:/etc/ldap/slapd.d
+      - ~/cdb-deployment/docker-volume-mounts/openldap/slapd-database:/var/lib/ldap
+      - ~/cdb-deployment/docker-volume-mounts/openldap/slapd-config:/etc/ldap/slapd.d
     ports:
       - 389:389
       - 636:636

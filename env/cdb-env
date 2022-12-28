@@ -2,7 +2,8 @@
 
 # Called from ~/.bashrc via "source ~/cdb-support/env/cdb-env", sets up environment environment variables for customization etc.
 
-source ~/cdb-deployment/env/cdb-env-passwd
+source ~/cdb-deployment/custom/env/cdb-env-passwd
+source ~/cdb-deployment/custom/env/cdb-env-vars
 
 export DIR_BIN=~/cdb-support/bin
 alias bin="cd $DIR_BIN"

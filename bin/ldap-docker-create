@@ -3,14 +3,14 @@
 SEED_FILE=~/cdb-deployment/custom/openldap/openldap-seed.ldif
 CONFIG_FILE=~/cdb-deployment/custom/openldap/environment/openldap.startup.yaml
 
-SEED_TARGET_DIR=~/cdb-deployment/openldap/seed/
-CONFIG_TARGET_DIR=~/cdb-deployment/openldap/environment/
+SEED_TARGET_DIR=~/cdb-deployment/docker-volume-mounts/openldap/seed/
+CONFIG_TARGET_DIR=~/cdb-deployment/docker-volume-mounts/openldap/environment/
 
-SLAPD_DATA_DIR=~/cdb-deployment/openldap/slapd-database
-SLAPD_CONFIG_DIR=~/cdb-deployment/openldap/slapd-config
+SLAPD_DATA_DIR=~/cdb-deployment/docker-volume-mounts/openldap/slapd-database
+SLAPD_CONFIG_DIR=~/cdb-deployment/docker-volume-mounts/openldap/slapd-config
 
-SEED_TARGET_FILE=~/cdb-deployment/openldap/seed/openldap-seed.ldif
-CONFIG_TARGET_FILE=~/cdb-deployment/openldap/environment/openldap.startup.yaml
+SEED_TARGET_FILE=~/cdb-deployment/docker-volume-mounts/openldap/seed/openldap-seed.ldif
+CONFIG_TARGET_FILE=~/cdb-deployment/docker-volume-mounts/openldap/environment/openldap.startup.yaml
 
 DHPARAMS_CERT_FILE=~/cdb-deployment/config/cdb/etc/CA/certs/ospreydcs.com/dhparam.pem
 
