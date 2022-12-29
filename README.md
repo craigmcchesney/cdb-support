@@ -54,3 +54,14 @@ The cdb-deployment repo contains the following directories:
     - letsencrypt - Working directory for certbot in managing TLS certificate.
 - docker-volume-mounts - Provides OS directories mounted to docker containers.
     - openldap - Contains docker volume mounts for various openldap container directories needed for docker-compose configuration.
+
+## using the repos
+
+Currently, my primary approach for using these repos is in VM instances deployed on AWS Lightsail.  As you might imagine, the installation checklist for all of the applications and supporting services is quite large, so one of my primary objectives was to build a reference Lightsail VM that I can copy and customize to create new application server instances.  To that end, I have been mostly successful, with a process for deploying new instances that takes a couple of hours instead of a couple of days (or more).
+
+Given this approach, I don't really have an "installation script" for building a new application server from scratch, though I will probably start to put one together the next time I'm asked to do so.  This is something I hope to avoid, however, as installing on a host at a new facility requires that I complete various IT and safety training programs, get to know system administrators, resolve issues due to differences in the host operating systems and other environments, deal with integration issues for LDAP authentication, work around Oracle-only database policies, etc etc etc.
+
+I have started working on a customization script in Python, that uses configuration file templates with embedded substituion variables, reads environment variables to obtain custom values for those variables, and generates configuration files for the various applications and tools.  But this might also be overkill, depending on how many times I'll be asked to do this.  So for now, I have a concise checklist of steps for customizing a Lightsail VM for a new deployment.
+
+### CDB/Traveler Lightsail VM customization checklist
+
