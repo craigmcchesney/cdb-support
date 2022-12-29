@@ -65,3 +65,175 @@ I have started working on a customization script in Python, that uses configurat
 
 ### CDB/Traveler Lightsail VM customization checklist
 
+#### create new VM from existing snapshot
+- Using the [aws lightsail console](https://lightsail.aws.amazon.com/ls/webapp), navigate to snapshots tab, select snapshot to start from, and "create new instance" from the snapshot's pop-up menu
+- Accept defaults (or increase memory size or whatever), name instance, and click "create", new instance appears on "instances" tab of console
+
+#### assign static ip address
+- Navigate to console's networking tab and select "Attach static IP" in the public IP panel of the page.  
+- In the dialog that appears, enter name for the static IP e.g., "mpex-app-server-static-ip".  
+- Click "Create and attach".
+- Make note of the ip address.
+
+#### add DNS records for new subdomain and applications 
+- Use the domain admin tool to add DNS records for mapping new static IP to domain name using an "A" record.
+- Add "CNAME" records for the varous applications (cdb, traveler, payara-admin, ldap-admin, mongo-express) that map to the host name specified by the "A" record.
+- Test connecting via ssh using DNS name instead of ip.
+
+#### disable crontab for "cdb" user
+- sudo su cdb
+- crontab -e
+    - comment out reboot cron job for ecosystem-start
+
+#### run ecosystem-stop to make sure nothing is running and reboot
+- ecosystem-stop
+- stop/start vm from lightsail admin console
+
+#### clean up "cdb" user home directory
+- Review and remove dotfiles , especially the payara ".gfclient" directory which apparently causes problems on a new VM.
+- rm -rf .bash_history-01657.tmp .cache .conda .config .dbshell .gfclient .java .lesshst .mysql_history .pm2 .wget-hsts
+
+#### remove existing cdb support directory
+- cd /opt/cdb
+- rm -rf support-*
+
+#### build new cdb support directory with fresh payara install etc
+- cd /opt/cdb/current
+- make support
+    - runs to this error message "error: Could not find suitable distribution for Requirement.parse('python_ldap')", which is "expected"
+
+#### test mariadb installation and database contents
+- ~/cdb-support/bin/mysql-client-cdb
+    - runs mysql client
+    - show tables;
+    - select count(*) from item;
+    - etc
+
+#### edit cdb configuration files
+- cd ~/cdb-deployment/config/cdb/etc
+- cdb.db.passwd
+    - check it contains the mysql "cdb" user password
+- cdb.deploy.conf
+    - CDB_PORTAL_TITLE
+    - DB_PERM_CONTEXT_ROOT_URL
+- plugins-cdb/traveler/traveler.properties
+    - webSerice.url
+    - webApp.url
+
+#### create tls certificate
+- Open browser tabs to DNS admin page for adding acme challenge DNS records for certbot verification, and google dig tool for verifying deployment of them
+- create new tls certificate
+    - ~/cdb-support/bin/tls-cert-create-or-renew
+    - Follow instructions in script for installing new certificate files.
+
+#### edit nginx configuration, test, and restart
+- sudo systemctl stop nginx
+- sudo vi /etc/nginx/conf.d/ospreydcs.com.conf
+    - change all server_name and rewrite to use appropriate subdomain
+- sudo nginx -t
+    - test configuration, check output for success
+- sudo systemctl start nginx
+    - make sure there is no error on startup
+    - if there are errors, it is probably due to selinux permissions, check nginx-selinux-permissive script in cdb-support/bin for fix
+- sudo systemctl status nginx
+    - check that it is running
+
+#### edit firewall rules in aws lightsail console
+- navigate to networking tab in aws console
+- delete rule for port 80 since we don't need standard http
+- add rules for HTTPS/TCP/443, Custom/TCP/3443
+- should already have rule for SSH/TCP/22
+
+#### deploy cdb traveler plugin
+- cd /opt/cdb/current
+- source setup.sh
+- make deploy-cdb-plugin
+    - select /opt/cdb/current/tools/developer_tools/cdb_plugins/plugins as target
+    - select traveler only from list of plugins to deploy
+
+#### configure and deploy cdb application
+- cd /opt/cdb/current
+- source setup.sh
+- make configure-web-portal
+- make deploy-web-portal
+- test applications
+
+#### create new branch of cdb-deployment for vm instance
+- cd ~
+- tar cvf cdb-deployment.tar cdb-deployment/*
+    - make backup just in case since there are ignored files
+- gzip cdb-deployment.tar
+- cd cdb-deployment
+- git status
+- git add -A
+- git stash
+    - stash any changes to existing branch, don't want to commit them yet!
+- git branch mpex-app-server
+- git checkout mpex-app-server
+- git merge aws-demo-cdb-3.14.1
+    - make sure we are up to date from source vm branch
+- cd ..
+- tar xvf cdb-deployment.tar.gz
+    - make sure we have all original contents
+- cd cdb-deployment
+- git stash pop
+    - pick up changes we stashed
+- git commit -am "create new branch"
+- git push --set-upstream origin mpex-app-server
+
+#### check openldap configuration and start docker container
+- config is in cdb-deployment/custom/openldap
+    - seed is the ldif seed file with initial users
+        - edit as appropriate to define initial ldap users, need an ldap user for each cdb/traveler user defined in those applications
+    - environment is the openldap config file with admin password etc
+- cdb-support/bin/ldap-docker-create copies config files from cdb-deployment/custom to cdb-deployment/openldap
+- cd ~/cdb-support/bin
+- ldap-docker-rm
+    - remove existing ldap docker container
+- ldap-docker-create
+    - create ldap docker container
+- ldap-start 
+    - to bring up ldap docker container
+- docker ps
+    - check status, should show phpldapadmin and openldap
+- test cdb login for a user defined in ldap (user must exist in both cdb and ldap)
+- test ldap admin app
+
+#### configure traveler
+- cd /home/cdb/cdb-deployment/config/traveler/etc/traveler-config
+- vi service.json
+    - "web_portal_url"
+
+#### start mongodb, mongoexpress, traveler and test
+- cd ~/cdb-support/bin
+- mongodb-start
+- mongodb-status
+- mongoexpress-start
+- mongoexpress-status
+- traveler-start
+- traveler-status
+- test traveler application URL
+- test login as user in ldap seed file
+- test mongo express application URL
+- test cdb item URL with link to traveler
+
+#### enable crontab
+- crontab -e
+    - uncomment reboot job for ecosystem-start (or add one):
+        - @reboot sleep 30 && /home/cdb/cdb-support/bin/ecosystem-start > /home/cdb/cdb-deployment/logs/ecosystem-start.out 2>&1
+
+#### check in changes to cdb-deployment
+- the only change since creating the new cdb-deployment branch above should be traveler "service.json", commit to github
+
+#### test ecosystem-stop
+- refresh all 5 browser application tabs, should get "502 Bad Gateway, nginx/1/14/1"
+
+#### create snapshot of vm
+- stop vm using lightsail console, wait for status "Stopped"
+- create snapshot using lightsail console
+
+#### start automatic vm backups
+- toggle "automatic snapshots are disabled" in lightsail console bottom of snapshots tab
+
+#### test reboot / ecosystem-start
+- refresh all apps and make sure that function correctly
