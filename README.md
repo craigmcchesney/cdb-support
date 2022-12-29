@@ -45,6 +45,7 @@ A branch is created in the cdb-deployment repo for each new deployment.  It cont
     - cron - Crontab file for Linux user, includes entry to start the application ecosystem on boot, etc.
     - env - Defines environment variables for the Linux user for use by cdb-support scripts etc.
     - images - User can provide logo images to override CDB defaults.
+    - openldap - LDIF seed and environment config for OpenLDAP docker container.
     - sql - Custom sql files used to initialize or otherwise manipulate the CDB MySQL database.
 - var (included in gitignore file so contents not managed)
     - logs
