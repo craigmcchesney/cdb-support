@@ -2,7 +2,7 @@
 
 The cdb-support repo provides tools for managing an ecosystem that includes the [Component Database (CDB)](https://github.com/AdvancedPhotonSource/ComponentDB) and [Traveler](https://github.com/AdvancedPhotonSource/traveler) applications developed at Argonne National Laboratory's [Advanced Photon Source](https://aps.anl.gov/) and Michigan State University's [Facility for Rare Isotope Beams](https://frib.msu.edu/), respectively.
 
-I've installed these applications at several particle accelerator and other large-scale experimental/research facilities, and decided it would be useful to have a common approach and set of tools for administering such an ecosystem.  Currently, I'm deploying servers on AWS Lightsail that include these applications plus supporting services, including:
+I've installed these applications at several particle accelerator and other large-scale experimental/research facilities, and decided it would be useful to have a common approach and set of tools for administering such an ecosystem.  Currently, I'm deploying servers on AWS Lightsail that include the following applications and supporting services:
 
 - Centos 8 stream Linux operating system
 - MariaDB relational database service
@@ -10,40 +10,40 @@ I've installed these applications at several particle accelerator and other larg
 - shared TLS certificate to enable secure HTTPS protocol across all applications and administrative tools
 - [OpenLDAP](https://github.com/osixia/docker-openldap) authentication service
 - [phpLDAPadmin](https://github.com/osixia/docker-phpLDAPadmin) for managing LDAP service
-- [NGINX](https://www.nginx.com/resources/glossary/nginx/) reverse proxy engine to provide uniform URL interface across all tools and applications and improve security by exposing a single external network port on the application server
+- [NGINX](https://www.nginx.com/resources/glossary/nginx/) reverse proxy engine to provide uniform URL interface across all tools and applications, and improve security by exposing only a single external network port on the application server
 - [Payara](https://www.payara.fish/) Java EE application server
 - Component Database (CDB) application
 - Traveler application
-- CDB-Traveler integration via CDB plugin
+- CDB-Traveler application integration via CDB plugin
 - web portals for administration of LDAP and Payara services
 - Mongo Express web portal providing GUI front-end to MongoDB
 
 ## project github repos
 
-I created two github repos to support building these servers.  This repo, cdb-support, contains scripts and other tools intended to be used in all server deployments.  The other, [cdb-deployment](https://github.com/craigmcchesney/cdb-deployment), contains artifacts such as config files that vary between server deployments.
+I created two github repos to support building these application servers.  This repo, cdb-support, contains scripts and other common tools intended to be used in all server deployments.  The other, [cdb-deployment](https://github.com/craigmcchesney/cdb-deployment), contains artifacts such as config files and environment set up that vary between server deployments.
 
 ### cdb-support repo
 
 This cdb-support repo contains the following directories:
 
-- bin - Includes scripts for managing the various applications and services, including the cdb and traveler applciations, ldap, mongodb, and mysql. It has scripts for starting and stopping the entire ecosystem and utilities for managing the TLS certificate via "certbot".  I've also begun development of a Python customization tool for configuring a new application server instance.
+- bin - Includes scripts for managing the various applications and services, including the cdb and traveler applciations, ldap, mongodb, and mysql. It has scripts for starting and stopping the entire ecosystem and utilities for managing the TLS certificate via "certbot".  I've also begun development of a Python customization tool for configuring a new application server instance, and will be adding backup and monitoring utilities as well.
 - sql - Includes some common SQL for initializing a new CDB MySQL database, or manipulating an existing one.
-- customization - Includes config file templates with substitution variables as input to the customization tool.
+- customization - Includes config file templates with substitution variables as input to the (under devleopment) customization tool.
 - env - Sets up the user's Linux environment for utilizing the two two repos.
 - openldap - Provides docker compose configuration for OpenLDAP and phpLDAPadmin tools.
 
 ### cdb-deployment repo
 
-The cdb-deployment repo contains the following directories:
+A branch is created in the cdb-deployment repo for each new deployment.  It contains the following directories:
 
 - config
-    - cdb - Config directory for cdb application, mounted by symbolic link to /opt/cdb/etc under the CDB installation.
-    - traveler - Config directory for traveler application, mounted by symbolic link to /opt/traveler/etc under the Traveler installation.
-    - nginx - Used to manage copy of the /etc/nginx/conf.d directory, unfortunately not a good way to manage this directly in github since systemctl blows up if symbolic links are used in the NGINX configuration.
+    - cdb - Config directory for cdb application, mounted by symbolic link under the CDB installation.
+    - traveler - Config directory for traveler application, mounted by symbolic link under the Traveler installation.
+    - nginx - Used to manage contents of the /etc/nginx/conf.d directory, unfortunately there is not a good way to manage this directly in github since systemctl blows up if symbolic links are used in the NGINX configuration.
 - custom
-    - config-edits - Symbolic links to the application configs edited for this deployment (precursor or possible input to customization tool).
-    - cron - Crontab file for Linux user, includes reboot entry to start the application ecosystem etc.
-    - env - Defines environment variables for the Linux user for use by scripts etc.
+    - config-edits - Symbolic links to the configs edited for this deployment (precursor or possible input to customization tool), contains a subdirectory each for cdb, traveler, and nginx.
+    - cron - Crontab file for Linux user, includes entry to start the application ecosystem on boot, etc.
+    - env - Defines environment variables for the Linux user for use by cdb-support scripts etc.
     - images - User can provide logo images to override CDB defaults.
     - sql - Custom sql files used to initialize or otherwise manipulate the CDB MySQL database.
 - var (included in gitignore file so contents not managed)
@@ -52,12 +52,12 @@ The cdb-deployment repo contains the following directories:
         - pm2-logs - PM2 logs for traveler application.
         - logs generated by scripts such as ecosystem-start on reboot
     - letsencrypt - Working directory for certbot in managing TLS certificate.
-- docker-volume-mounts - Provides OS directories mounted to docker containers.
+- docker-volume-mounts - Provides OS directories for mounting to docker containers.
     - openldap - Contains docker volume mounts for various openldap container directories needed for docker-compose configuration.
 
 ## using the repos
 
-Currently, my primary approach for using these repos is in VM instances deployed on AWS Lightsail.  As you might imagine, the installation checklist for all of the applications and supporting services is quite large, so one of my primary objectives was to build a reference Lightsail VM that I can copy and customize to create new application server instances.  To that end, I have been mostly successful, with a process for deploying new instances that takes a couple of hours instead of a couple of days (or more).
+Currently, my primary use for these repos is in VM instances deployed on AWS Lightsail.  As you might imagine, the installation checklist for all of the applications and supporting services mentioned above is quite large, so one of my primary objectives was to build a reference Lightsail VM that I can copy and customize to create new application server instances.  To that end, I have been mostly successful, with a process for deploying new instances that takes a couple of hours instead of a couple of days (or more).
 
 Given this approach, I don't really have an "installation script" for building a new application server from scratch, though I will probably start to put one together the next time I'm asked to do so.  This is something I hope to avoid, however, as installing on a host at a new facility requires that I complete various IT and safety training programs, get to know system administrators, resolve issues due to differences in the host operating systems and other environments, deal with integration issues for LDAP authentication, work around Oracle-only database policies, etc etc etc.
 
@@ -67,8 +67,9 @@ I have started working on a customization script in Python, that uses configurat
 - CDB is installed to /opt/cdb
 - Traveler is installed to /opt/traveler
 - NGINX is installed in /etc/nginx
-- "centos" user is the VM's root user
-- "cdb" user owns and manages the CDB/Traveler applications
+- the latest version of MariaDB relational database service is installed
+- Linux "centos" user is the VM's root user
+- Linux "cdb" user owns and manages the CDB/Traveler applications
     - cdb-support repo is installed to ~cdb/cdb-support
     - cdb-deployment repo is installed to ~/cdb/cdb-deployment
         - /opt/cdb/etc is symbolic link to ~/cdb-deployment/config/cdb
@@ -84,13 +85,13 @@ I have started working on a customization script in Python, that uses configurat
 
 #### assign static ip address
 - Navigate to console's networking tab and select "Attach static IP" in the public IP panel of the page.  
-- In the dialog that appears, enter name for the static IP e.g., "mpex-app-server-static-ip".  
+- In the dialog that appears, enter name for the static IP.  
 - Click "Create and attach".
 - Make note of the ip address.
 
 #### add DNS records for new subdomain and applications 
-- Use the domain admin tool to add DNS records for mapping new static IP to domain name using an "A" record.
-- Add "CNAME" records for the varous applications (cdb, traveler, payara-admin, ldap-admin, mongo-express) that map to the host name specified by the "A" record.
+- Use the domain admin tool to add DNS records for mapping new static IP address to a subdomain/host name using an "A" record (e.g, app-server.example.com).
+- Add "CNAME" records for the varous applications (cdb.app-server.example.com, traveler.app-server.example.com, payara-admin.app-server.example.com, ldap-admin.app-server.example.com, mongo-express.app-server.example.com) that map to the same host name specified by the "A" record.
 - Test connecting via ssh using DNS name instead of ip.
 
 #### disable crontab for "cdb" user
@@ -108,7 +109,7 @@ I have started working on a customization script in Python, that uses configurat
 
 #### remove existing cdb support directory
 - cd /opt/cdb
-- rm -rf support-*
+- rm -rf support-xxx (where XXX is host name or IP address) used to build source VM
 
 #### build new cdb support directory with fresh payara install etc
 - cd /opt/cdb/current
@@ -125,31 +126,33 @@ I have started working on a customization script in Python, that uses configurat
 #### edit cdb configuration files
 - cd ~/cdb-deployment/config/cdb/etc
 - cdb.db.passwd
-    - check it contains the mysql "cdb" user password
+    - check it contains the mysql password for "cdb" user
 - cdb.deploy.conf
     - CDB_PORTAL_TITLE
     - DB_PERM_CONTEXT_ROOT_URL
 - plugins-cdb/traveler/traveler.properties
-    - webSerice.url
+    - webSerice.url (sic)
     - webApp.url
 
-#### create tls certificate
-- Open browser tabs to DNS admin page for adding acme challenge DNS records for certbot verification, and google dig tool for verifying deployment of them
-- create new tls certificate
+#### create TLS certificate
+- Open browser tabs to DNS admin page for adding acme challenge DNS records for certbot verification, and [google dig tool](https://toolbox.googleapps.com/apps/dig) for verifying deployment of them
+- create new TLS certificate
     - ~/cdb-support/bin/tls-cert-create-or-renew
-    - Follow instructions in script for installing new certificate files.
+        - Script executes certbot to create certificate, using wildcard subdomain registered in DNS e.g, *.app-server.example.com
+        - Follow instructions in script for installing new certificate files.
 
-#### edit nginx configuration, test, and restart
+#### edit NGINX configuration, test, and restart
 - sudo systemctl stop nginx
 - sudo vi /etc/nginx/conf.d/ospreydcs.com.conf
+    - contains an NGINX "server" definition block for each web application, e.g, cdb, traveler, payara-admin, ldap-admin, mongo-express
     - change all server_name and rewrite to use appropriate subdomain
 - sudo nginx -t
     - test configuration, check output for success
 - sudo systemctl start nginx
     - make sure there is no error on startup
-    - if there are errors, it is probably due to selinux permissions, check nginx-selinux-permissive script in cdb-support/bin for fix
+    - if there are errors, it is probably due to selinux permissions, 
+    - check ~/cdb-support/bin/nginx-selinux-permissive script in cdb-support/bin for fix
 - sudo systemctl status nginx
-    - check that it is running
 
 #### edit firewall rules in aws lightsail console
 - navigate to networking tab in aws console
@@ -169,37 +172,19 @@ I have started working on a customization script in Python, that uses configurat
 - source setup.sh
 - make configure-web-portal
 - make deploy-web-portal
-- test applications
-
-#### create new branch of cdb-deployment for vm instance
-- cd ~
-- tar cvf cdb-deployment.tar cdb-deployment/*
-    - make backup just in case since there are ignored files
-- gzip cdb-deployment.tar
-- cd cdb-deployment
-- git status
-- git add -A
-- git stash
-    - stash any changes to existing branch, don't want to commit them yet!
-- git branch mpex-app-server
-- git checkout mpex-app-server
-- git merge aws-demo-cdb-3.14.1
-    - make sure we are up to date from source vm branch
-- cd ..
-- tar xvf cdb-deployment.tar.gz
-    - make sure we have all original contents
-- cd cdb-deployment
-- git stash pop
-    - pick up changes we stashed
-- git commit -am "create new branch"
-- git push --set-upstream origin mpex-app-server
+- test application URLs:
+    - https://cdb.app-server.example.com
+    - https://traveler.app-server.example.com
+    - https://payara-admin.app-server.example.com
+    - https://ldap-admin.app-server.example.com
+    - https://mongo-express.app-server.example.com
 
 #### check openldap configuration and start docker container
 - config is in cdb-deployment/custom/openldap
     - seed is the ldif seed file with initial users
         - edit as appropriate to define initial ldap users, need an ldap user for each cdb/traveler user defined in those applications
     - environment is the openldap config file with admin password etc
-- cdb-support/bin/ldap-docker-create copies config files from cdb-deployment/custom to cdb-deployment/openldap
+    - cdb-support/bin/ldap-docker-create copies config files from cdb-deployment/custom to cdb-deployment/openldap
 - cd ~/cdb-support/bin
 - ldap-docker-rm
     - remove existing ldap docker container
@@ -225,23 +210,44 @@ I have started working on a customization script in Python, that uses configurat
 - mongoexpress-status
 - traveler-start
 - traveler-status
-- test traveler application URL
+- test traveler application URL https://traveler.app-server.example.com
 - test login as user in ldap seed file
-- test mongo express application URL
-- test cdb item URL with link to traveler
+- test mongo express application URL https://mongo-express.app-server.example.com
+- test CDB item URL with link to traveler application
 
 #### enable crontab
 - crontab -e
     - uncomment reboot job for ecosystem-start (or add one):
-        - @reboot sleep 30 && /home/cdb/cdb-support/bin/ecosystem-start > /home/cdb/cdb-deployment/logs/ecosystem-start.out 2>&1
+        - @reboot sleep 30 && /home/cdb/cdb-support/bin/ecosystem-start > /home/cdb/cdb-deployment/var/logs/ecosystem-start.out 2>&1
 
-#### check in changes to cdb-deployment
-- the only change since creating the new cdb-deployment branch above should be traveler "service.json", commit to github
+#### create new branch of cdb-deployment for vm instance
+- cd ~
+- tar cvf cdb-deployment.tar cdb-deployment/*
+    - make backup just in case since there are ignored files
+- gzip cdb-deployment.tar
+- cd cdb-deployment
+- git status
+- git add -A
+- git stash
+    - stash any changes to existing branch, don't want to commit them yet!
+- git branch app-server
+- git checkout app-server
+- git merge reference-vm
+    - make sure we are up to date from source vm branch
+- cd ..
+- tar xvf cdb-deployment.tar.gz
+    - make sure we have all original contents
+- cd cdb-deployment
+- git stash pop
+    - pick up changes we stashed
+- git commit -am "create new branch"
+- git push --set-upstream origin app-server
 
 #### test ecosystem-stop
+- ~/cdb-support/bin/ecosystem-stop
 - refresh all 5 browser application tabs, should get "502 Bad Gateway, nginx/1/14/1"
 
-#### create snapshot of vm
+#### create baseline snapshot of vm
 - stop vm using lightsail console, wait for status "Stopped"
 - create snapshot using lightsail console
 
@@ -249,4 +255,4 @@ I have started working on a customization script in Python, that uses configurat
 - toggle "automatic snapshots are disabled" in lightsail console bottom of snapshots tab
 
 #### test reboot / ecosystem-start
-- refresh all apps and make sure that function correctly
+- refresh all apps and make sure that they function correctly
