@@ -61,7 +61,20 @@ Currently, my primary approach for using these repos is in VM instances deployed
 
 Given this approach, I don't really have an "installation script" for building a new application server from scratch, though I will probably start to put one together the next time I'm asked to do so.  This is something I hope to avoid, however, as installing on a host at a new facility requires that I complete various IT and safety training programs, get to know system administrators, resolve issues due to differences in the host operating systems and other environments, deal with integration issues for LDAP authentication, work around Oracle-only database policies, etc etc etc.
 
-I have started working on a customization script in Python, that uses configuration file templates with embedded substituion variables, reads environment variables to obtain custom values for those variables, and generates configuration files for the various applications and tools.  But this might also be overkill, depending on how many times I'll be asked to do this.  So for now, I have a concise checklist of steps for customizing a Lightsail VM for a new deployment.
+I have started working on a customization script in Python, that uses configuration file templates with embedded substituion variables, reads environment variables to obtain custom values for those variables, and generates configuration files for the various applications and tools.  But this might also be overkill, depending on how many times I'll be asked to do this.  So for now, I have a concise checklist of steps for customizing a Lightsail VM for a new deployment, listed below for your entertainment.
+
+### VM user and directory assumptions
+- CDB is installed to /opt/cdb
+- Traveler is installed to /opt/traveler
+- NGINX is installed in /etc/nginx
+- "centos" user is the VM's root user
+- "cdb" user owns and manages the CDB/Traveler applications
+    - cdb-support repo is installed to ~cdb/cdb-support
+    - cdb-deployment repo is installed to ~/cdb/cdb-deployment
+        - /opt/cdb/etc is symbolic link to ~/cdb-deployment/config/cdb
+        - /opt/traveler/etc is symbolic link to ~/cdb-deployment/config/traveler 
+        - ~/cdb-deployment/var/logs/cdb-logs is symbolic link to /opt/cdb/support-*/payara/linux-x86_64/glassfish/domains/production/logs
+        - ~/cdb-deployment/var/logs/pm2-logs is symbolic link to ~cdb/.pm2/logs/
 
 ### CDB/Traveler Lightsail VM customization checklist
 
